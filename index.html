@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Undian Arisan</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+      height: 100vh;
+      font-family: 'Open Sans', sans-serif;
+    }
+
+    @keyframes gradient {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .crossed-out {
+      background-color: rgba(255, 0, 0, 0.2);
+    }
+
+    .button-style {
+      background-color: #6b21a8;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      font-weight: bold;
+      text-align: center;
+      transition: all 0.3s ease;
+      margin: 0.25rem;
+      width: calc(33.33% - 0.5rem);
+    }
+
+    .button-style:active {
+      transform: scale(0.98);
+    }
+
+    .gradient-button {
+      background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      font-weight: bold;
+      text-align: center;
+      transition: all 0.3s ease;
+      margin: 0.25rem;
+    }
+
+    .gradient-button:hover {
+      background: linear-gradient(-45deg, #e73c7e, #ee7752, #23d5ab, #23a6d5);
+    }
+
+    .import-button {
+      background: linear-gradient(-45deg, #4CAF50, #45a049, #388E3C, #2E7D32);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+    }
+
+    .import-button:hover {
+      background: linear-gradient(-45deg, #45a049, #388E3C, #2E7D32, #1B5E20);
+    }
+
+    .export-button {
+      background: linear-gradient(-45deg, #2196F3, #1E88E5, #1976D2, #1565C0);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+    }
+
+    .export-button:hover {
+      background: linear-gradient(-45deg, #1E88E5, #1976D2, #1565C0, #0D47A1);
+    }
+
+    .reset-button {
+      background: linear-gradient(-45deg, #F44336, #E53935, #D32F2F, #C62828);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+    }
+
+    .reset-button:hover {
+      background: linear-gradient(-45deg, #E53935, #D32F2F, #C62828, #B71C1C);
+    }
+
+    h1 {
+      font-family: 'Montserrat', sans-serif;
+      margin-top: 1rem;
+    }
+
+    .name-item {
+      padding: 0.5rem;
+      text-align: center;
+      border-radius: 0.375rem;
+      background-color: #f3f4f6;
+      color: #374151;
+    }
+
+    .name-item.crossed-out {
+      background-color: rgba(255, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center p-4">
+
+  <h1 class="text-4xl font-bold text-white mb-2">UNDIAN ARISAN</h1>
+  <div id="current-date" class="text-white mb-6"></div>
+  <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md mb-6">
+    <div class="text-center mb-4">
+      <p class="text-xl font-semibold mb-2">Nama Terpilih</p>
+      <div id="current-winner" class="text-3xl font-bold text-purple-600 h-12 mb-4">?</div>
+      <button
+        id="spin-button"
+        class="gradient-button w-full flex items-center justify-center"
+      >
+        <svg id="shuffle-icon" class="mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+        </svg>
+        Mulai Undian
+      </button>
+    </div>
+    <div>
+      <h2 class="text-xl font-semibold mb-4">Daftar Nama</h2>
+      <div id="name-list" class="grid grid-cols-3 gap-2">
+        <!-- Nama-nama akan dimuat di sini -->
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col items-center w-full max-w-md">
+    <input type="file" id="import-names" class="hidden">
+    <div class="flex justify-between w-full">
+      <button id="import-button" class="button-style import-button">Import</button>
+      <button id="export-button" class="button-style export-button">Export</button>
+      <button id="reset-button" class="button-style reset-button">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    const defaultNames = [
+      "Budi", "Ani", "Siti", "Dedi", "Rina", "Joko",
+      "Dewi", "Agus", "Lina", "Rudi", "Maya", "Eko"
+    ];
+
+    let names = JSON.parse(localStorage.getItem('names')) || [...defaultNames];
+    let winners = JSON.parse(localStorage.getItem('winners')) || [];
+    let currentWinner = null;
+    let isSpinning = false;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const nameList = document.getElementById("name-list");
+      const currentWinnerElement = document.getElementById("current-winner");
+      const spinButton = document.getElementById("spin-button");
+      const shuffleIcon = document.getElementById("shuffle-icon");
+      const importButton = document.getElementById("import-button");
+      const exportButton = document.getElementById("export-button");
+      const resetButton = document.getElementById("reset-button");
+      const importNames = document.getElementById("import-names");
+      const currentDateElement = document.getElementById("current-date");
+
+      function renderNames() {
+        nameList.innerHTML = "";
+        names.forEach(name => {
+          const nameDiv = document.createElement("div");
+          nameDiv.className = `name-item ${winners.includes(name) ? "crossed-out" : ""}`;
+          nameDiv.textContent = name;
+          nameList.appendChild(nameDiv);
+        });
+      }
+
+      function spinWheel() {
+        isSpinning = true;
+        spinButton.disabled = true;
+        shuffleIcon.classList.add("animate-spin");
+
+        let spinDuration = 3000;
+        let spinInterval = 100;
+        let spins = spinDuration / spinInterval;
+        let currentSpin = 0;
+
+        const intervalId = setInterval(() => {
+          const randomIndex = Math.floor(Math.random() * names.length);
+          currentWinner = names[randomIndex];
+          currentWinnerElement.textContent = currentWinner;
+          currentSpin++;
+
+          if (currentSpin >= spins) {
+            clearInterval(intervalId);
+            selectWinner();
+          }
+        }, spinInterval);
+      }
+
+      function selectWinner() {
+        const availableNames = names.filter(name => !winners.includes(name));
+        if (availableNames.length > 0) {
+          const randomIndex = Math.floor(Math.random() * availableNames.length);
+          const winner = availableNames[randomIndex];
+          winners.push(winner);
+          localStorage.setItem('winners', JSON.stringify(winners));
+          currentWinner = winner;
+          currentWinnerElement.textContent = currentWinner;
+        }
+        isSpinning = false;
+        spinButton.disabled = false;
+        shuffleIcon.classList.remove("animate-spin");
+        renderNames();
+      }
+
+      function importNamesFromFile(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const text = e.target.result;
+            names = text.split('\n').map(name => name.trim()).filter(name => name !== '');
+            localStorage.setItem('names', JSON.stringify(names));
+            renderNames();
+          };
+          reader.readAsText(file);
+        }
+      }
+
+      function exportNamesToFile() {
+        const text = names.join('\n');
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'names.txt';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function resetData() {
+        names = [...defaultNames];
+        winners = [];
+        localStorage.setItem('names', JSON.stringify(names));
+        localStorage.setItem('winners', JSON.stringify(winners));
+        currentWinnerElement.textContent = '?';
+        renderNames();
+      }
+
+      function formatDate() {
+        const days = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        const date = new Date();
+        const dayName = days[date.getDay()];
+        const day = date.getDate().toString().padStart(2, '0');
+        const monthName = months[date.getMonth()];
+        const year = date.getFullYear();
+        return `( ${dayName}, ${day} ${monthName} ${year} )`;
+      }
+
+      currentDateElement.textContent = formatDate();
+      renderNames();
+
+      spinButton.addEventListener("click", spinWheel);
+      importButton.addEventListener("click", () => importNames.click());
+      importNames.addEventListener("change", importNamesFromFile);
+      exportButton.addEventListener("click", exportNamesToFile);
+      resetButton.addEventListener("click", resetData);
+    });
+  </script>
+</body>
+</html>
